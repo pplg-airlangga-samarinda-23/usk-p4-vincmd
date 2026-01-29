@@ -1,26 +1,29 @@
 <?php
+session_start();
+include('koneksi.php');
+
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
-    
     $username = $_POST['username'];
     $password = $_POST['password'];
-    $sql="SELECT * FROM user WHERE id=?";
-    $user=$koneksi->execute_query($sql,[$username])->fetch_assoc();
-    $cek = password_verify($password,$user['password']);
 
-    if($cek){
-        session_start();
+    $sql = "SELECT * FROM user WHERE username=?";
+    $user = $koneksi->execute_query($sql, [$username])->fetch_assoc();
+
+    if($user && password_verify($password, $user['password'])){
         $_SESSION['id_user'] = $user['id'];
-        $_SESSION['usernmae'] = $user['username'];
+        $_SESSION['username'] = $user['username'];
         $_SESSION['role'] = $user['role'];
 
         if($user['role'] == 'admin'){
-            header("location:dashboard_admin.php");
+            header("Location: dashboard_admin.php");
         } else {
-            header("location:dashboard_aggota.php");
+            header("Location: dashboard_anggota.php");
         }
+        exit;
+    } else {
+        $error= "Username atau password salah";
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -28,20 +31,28 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Login</title>
 </head>
 <body>
+    <div class="wrapper">
+
     <h1>Login Sitem perpustakaan</h1>
-    <form action="dashboard_admin.php" method="post">
-        <div class="form-item">
+    
+    <form action="" method="post">
+        <div class="input-box">
             <label for="username">username</label>
             <input type="text" name="username" id="username">
         </div>
-        <div class="form-item">
+        <div class="input-box">
             <label for="password">password</label>
             <input type="password" name="password" id="password">
         </div>
-        <button type="submit">Login</button>
+        <button type="submit" class="login">Login</button>
+          <?php if(!empty($error)) : ?>
+        <p class="error"><?= $error ?></p>
+    <?php endif; ?>
+    </div>
 </body>
 </form>
 </html>
