@@ -12,6 +12,7 @@
         <ul>
             <li>katalog buku</li>
             <li>Tentang</li>
+            <li><a href="register.php">Daftar Anggota</a></li>
             <li><a href="login.php">Login</a></li>
         </ul>
     </nav>
