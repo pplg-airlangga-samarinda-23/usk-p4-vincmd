@@ -46,6 +46,7 @@ CREATE TABLE `peminjaman` (
   `id_user` int NOT NULL,
   `tanggal_pinjam` date DEFAULT NULL,
   `tanggal_kembali` date DEFAULT NULL
+  
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------

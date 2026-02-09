@@ -37,7 +37,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 <body>
     <div class="wrapper">
 
-    <h1>Login Sitem perpustakaan</h1>
+    <h1>Login Sistem perpustakaan</h1>
     
     <form action="" method="post">
         <div class="input-box">

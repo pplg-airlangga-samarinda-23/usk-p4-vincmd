@@ -1,20 +1,27 @@
 <?php
-session_start();
 include 'koneksi.php';
+session_start();
+$sql = "
+SELECT 
+    p.id,
+    u.username,
+    b.judul,
+    p.tanggal_pinjam
+FROM peminjaman p
+JOIN user u ON p.id_user = u.id
+JOIN buku b ON p.id_buku = b.id
+WHERE p.status = 'dipinjam'
+";
 
-if (!isset($_SESSION['id_user'])) {
-    header("Location: login.php");
-    exit;
-}
-
-$buku = $koneksi->query("SELECT * FROM buku WHERE stok > 0");
+$data = $koneksi->query($sql);
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pinjam Buku</title>
+<title>Pengembalian Buku</title>
 
 <style>
 /* RESET & FONTS */
@@ -53,35 +60,45 @@ header h2 {
     border: 1px solid #e5e7eb;
     border-radius: 14px;
     padding: 20px;
-    max-width: 500px;
+    max-width: 900px;
     margin: auto;
     box-shadow: 0 4px 8px rgba(0,0,0,0.03);
+    overflow-x: auto;
 }
 
-/* FORM */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-label {
-    font-weight: 500;
-}
-
-select {
-    padding: 10px 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
+/* TABLE */
+table {
     width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 12px 14px;
+    text-align: left;
+}
+
+th {
+    background: #f0f9ff;
+    border-bottom: 1px solid #bae6fd;
     font-size: 14px;
 }
 
+td {
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 14px;
+}
+
+tr:hover {
+    background: #f0f9ff;
+}
+
+/* BUTTON */
 button {
-    padding: 10px 14px;
+    padding: 6px 12px;
     border: none;
     border-radius: 8px;
-    background: #0284c7;
+    background: #16a34a;
     color: #fff;
     font-weight: 500;
     cursor: pointer;
@@ -89,15 +106,10 @@ button {
 }
 
 button:hover {
-    background: #0369a1;
+    background: #15803d;
 }
 
-/* INFO USER */
-.user-info {
-    margin-bottom: 15px;
-    font-size: 14px;
-}
-
+/* BACK LINK */
 .back {
     display: inline-block;
     margin-top: 20px;
@@ -114,29 +126,46 @@ button:hover {
 <body>
 
 <header>
-    <h2>Form Peminjaman Buku</h2>
+    <h2>Form Pengembalian Buku</h2>
 </header>
 
 <div class="container">
 <div class="card">
 
-<p class="user-info">Login sebagai: <b><?= htmlspecialchars($_SESSION['username']) ?></b></p>
-
-<form method="post" action="proses_pinjam.php">
-    <label>Pilih Buku</label>
-    <select name="id_buku" required>
-        <option value="">-- Pilih Buku --</option>
-        <?php while ($b = $buku->fetch_assoc()) { ?>
-            <option value="<?= $b['id'] ?>">
-                <?= htmlspecialchars($b['judul']) ?> (stok: <?= $b['stok'] ?>)
-            </option>
-        <?php } ?>
-    </select>
-
-    <button type="submit">Pinjam</button>
-</form>
-
+<table>
+<thead>
+<tr>
+    <th>No</th>
+    <th>Username</th>
+    <th>Judul Buku</th>
+    <th>Tanggal Pinjam</th>
+    <th>Aksi</th>
+</tr>
+</thead>
+<tbody>
+<?php 
+$no = 1;
+while($d = $data->fetch_assoc()){ ?>
+<tr>
+    <td><?= $no++ ?></td>
+    <td><?= htmlspecialchars($d['username']) ?></td>
+    <td><?= htmlspecialchars($d['judul']) ?></td>
+    <td><?= htmlspecialchars($d['tanggal_pinjam']) ?></td>
+    <td>
+        <form action="proses_pengembalian.php" method="post" style="display:inline;">
+            <input type="hidden" name="id_peminjaman" value="<?= $d['id'] ?>">
+            <button type="submit"
+                onclick="return confirm('Yakin buku dikembalikan?')">
+                Kembalikan
+            </button>
+        </form>
+    </td>
+</tr>
+<?php } ?>
+</tbody>
+</table>
 <?php
+
 
 // Ambil role user dari session
 $role = $_SESSION['role'] ?? 'anggota'; // default anggota kalau kosong
@@ -147,10 +176,8 @@ $dashboard = ($role === 'admin') ? 'dashboard_admin.php' : 'dashboard_anggota.ph
 
 <a href="<?= $dashboard ?>" class="back">← Kembali ke Dashboard</a>
 
-
 </div>
 </div>
 
 </body>
 </html>
-
